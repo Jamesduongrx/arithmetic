@@ -330,10 +330,23 @@ class RemoveP(lark.Transformer):
         return f"{children[0]}-{children[1]}"
 
     def mul(self, children):
-        return f"{children[0]}*{children[1]}"
+        left, right = children
+        if isinstance(left, str) and "+" in left or "-" in left:
+            left = f"({left})"
+        if isinstance(right, str) and "+" in right or "-" in right:
+            right = f"({right})"
+        return f"{left}*{right}"
 
     def div(self, children):
-        return f"{children[0]}/{children[1]}"
+        left, right = children
+
+        if isinstance(left, str) and "+" in left or "-" in left:
+            left = f"({left})"
+            
+        if isinstance(right, str) and "+" in right or "-" in right:
+            right = f"({right})"
+        return f"{left}/{right}"
+
 
     def mod(self, children):
         return f"{children[0]}%{children[1]}"
