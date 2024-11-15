@@ -146,6 +146,10 @@ class Interpreter(lark.visitors.Interpreter):
 
     def sub(self, tree):
         return self.visit(tree.children[0]) - self.visit(tree.children[1])
+    
+    def implicit_mul(self, tree):
+        return self.visit(tree.children[0]) * self.visit(tree.children[1])
+
 
     def mul(self, tree):
         x = self.visit(tree.children[0])
@@ -296,6 +300,11 @@ class Simplifier(lark.Transformer):
         
         def paren(self, children):
             return children[0]
+
+        def implicit_mul(self, children):
+        
+            return children[0] * children[1]
+
 
 
 
