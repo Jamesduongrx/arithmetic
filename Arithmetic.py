@@ -469,7 +469,7 @@ def infix_to_rpn(expr):
 
 
     
-    #recheck
+    #re
 
 def eval_rpn(expr):
     '''
