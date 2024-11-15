@@ -318,11 +318,29 @@ class Simplifier(lark.Transformer):
 
 class RemoveP(lark.Transformer):
     def paren(self, children):
-        child = children[0]
+        return f"({children[0]})"
+    def add(self, children):
+        return f"{children[0]}+{children[1]}"
 
-        if isinstance(child, str) and ('+' in child or '-' in child):
-            return f"({child})"
-        return child
+    def sub(self, children):
+        return f"{children[0]}-{children[1]}"
+
+    def mul(self, children):
+        return f"{children[0]}*{children[1]}"
+
+    def div(self, children):
+        return f"{children[0]}/{children[1]}"
+
+    def mod(self, children):
+        return f"{children[0]}%{children[1]}"
+
+    def exp(self, children):
+        return f"{children[0]}**{children[1]}"
+
+    def number(self, children):
+        return str(children[0])
+
+
 
 
 class ToString(lark.Transformer):
