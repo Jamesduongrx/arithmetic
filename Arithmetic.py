@@ -308,26 +308,6 @@ class RemoveP(lark.Transformer):
     def start(self, children):
             return children[0]
         
-    def number(self, children):
-            return int(children[0])
-
-    def add(self, children):
-            return children[0] + children[1]
-
-    def sub(self, children):
-            return children[0] - children[1]
-
-    def mul(self, children):
-            return children[0] * children[1]
-
-    def div(self, children):
-            return children[0] // children[1]
-
-    def mod(self, children):
-            return children[0] % children[1]
-
-    def exp(self, children):
-            return int(children[0] ** children[1])
 
 
 class ToString(lark.Transformer):
