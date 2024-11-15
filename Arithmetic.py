@@ -161,9 +161,8 @@ class Interpreter(lark.visitors.Interpreter):
 
 
     def mod(self, tree):
-        x = self.visit(tree.children[0])
-        y = self.visit(tree.children[1])
-        return x  % y
+        return self.visit(tree.children[0]) % self.visit(tree.children[1])
+
     def neg(self, tree):
         return -self.visit(tree.children[0])
 
@@ -275,39 +274,38 @@ class Simplifier(lark.Transformer):
     >>> simplifier.transform(parser.parse("(1+2)(3(4))"))
     36
     '''
-    class Simplifier(lark.Transformer):
-        def start(self, children):
-            return children[0]
+    def start(self, children):
+        return children[0]
         
-        def number(self, children):
+    def number(self, children):
             return int(children[0])
 
-        def add(self, children):
+    def add(self, children):
             return children[0] + children[1]
-        def neg(self, children):
+    def neg(self, children):
             return -children[0]
 
-        def sub(self, children):
+    def sub(self, children):
             return children[0] - children[1]
 
-        def mul(self, children):
+    def mul(self, children):
             return children[0] * children[1]
 
-        def div(self, children):
+    def div(self, children):
             return children[0] // children[1]
 
-        def mod(self, children):
+    def mod(self, children):
             return children[0] % children[1]
 
-        def exp(self, children):
+    def exp(self, children):
             x, y = children
             return x ** y if y >= 0 else 0
 
         
-        def paren(self, children):
+    def paren(self, children):
             return children[0]
 
-        def implicit_mul(self, children):
+    def implicit_mul(self, children):
         
             return children[0] * children[1]
 
