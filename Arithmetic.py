@@ -278,7 +278,7 @@ class Simplifier(lark.Transformer):
         return children[0]
         
     def number(self, children):
-            return int(children[0])
+            return int(children[0].value)
 
     def add(self, children):
             return children[0] + children[1]
