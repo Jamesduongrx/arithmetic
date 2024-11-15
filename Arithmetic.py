@@ -319,7 +319,10 @@ class Simplifier(lark.Transformer):
 class RemoveP(lark.Transformer):
     def paren(self, children):
         child = children[0]
-        return f"({child})" if "+" in str(child) or "-" in str(child) else child
+
+        if isinstance(child, str) and ('+' in child or '-' in child):
+            return f"({child})"
+        return child
 
 
 class ToString(lark.Transformer):
