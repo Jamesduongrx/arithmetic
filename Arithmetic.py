@@ -326,9 +326,6 @@ class ToString(lark.Transformer):
 
     def number(self, children):
         return str(children[0])
-    def exp(self, children):
-        return f"{children[0]}**{children[1]}"
-#whats wrong with children[0] +..
 
     def add(self, children):
         return f"{children[0]}+{children[1]}"
@@ -345,9 +342,11 @@ class ToString(lark.Transformer):
     def mod(self, children):
         return f"{children[0]}%{children[1]}"
 
-    
+    def exp(self, children):
+        return f"{children[0]}**{children[1]}"
+
     def paren(self, children):
-        return f"({children[0]})"
+        return children[0]
 
 
 
