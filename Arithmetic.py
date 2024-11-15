@@ -403,29 +403,33 @@ def minify(expr):
 
 
 class ToRPN(lark.Transformer):
+    def start(self, children):
+        return " ".join(children)
+
     def number(self, children):
         return str(children[0])
 
     def add(self, children):
-        return " ".join([children[0], children[1], "+"])
+        return f"{children[0]} {children[1]} +"
 
     def sub(self, children):
-        return " ".join([children[0], children[1], "-"])
+        return f"{children[0]} {children[1]} -"
 
     def mul(self, children):
-        return " ".join([children[0], children[1], "*"])
+        return f"{children[0]} {children[1]} *"
 
     def div(self, children):
-        return " ".join([children[0], children[1], "/"])
+        return f"{children[0]} {children[1]} /"
 
     def mod(self, children):
-        return " ".join([children[0], children[1], "%"])
+        return f"{children[0]} {children[1]} %"
 
     def exp(self, children):
-        return " ".join([children[0], children[1], "**"])
+        return f"{children[0]} {children[1]} **"
 
     def paren(self, children):
         return children[0]
+
 
 def infix_to_rpn(expr):
     '''
