@@ -14,15 +14,17 @@ grammar = r"""
         | sum "-" product   -> sub
         
 
-    ?product: atom
-        | product "*" atom  -> mul
-        | product "/" atom  -> div
-        | product "%" power -> mod
-
+    ?product: power
+        | product "*" power  -> mul
+        | product "/" power  -> div
+        | product "%" power  -> mod
 
     ?power: atom "**" power   -> exp
+         | atom
+    
 
     ?atom: NUMBER    -> number
+        | "-" atom   -> neg
         | "(" sum ")"       -> paren
         | atom "(" sum ")" -> implicit_mul  
 
@@ -151,19 +153,19 @@ class Interpreter(lark.visitors.Interpreter):
 
 
     def mul(self, tree):
-        x = self.visit(tree.children[0])
-        y = self.visit(tree.children[1])
-        return x * y
+        return self.visit(tree.children[0]) * self.visit(tree.children[1])
+
 
     def div(self, tree):
-        x = self.visit(tree.children[0])
-        y = self.visit(tree.children[1])
-        return x // y
+        return self.visit(tree.children[0]) // self.visit(tree.children[1])
+
 
     def mod(self, tree):
         x = self.visit(tree.children[0])
         y = self.visit(tree.children[1])
         return x  % y
+    def neg(self, tree):
+        return -self.visit(tree.children[0])
 
     def exp(self, tree):
         x = self.visit(tree.children[0])
@@ -282,6 +284,8 @@ class Simplifier(lark.Transformer):
 
         def add(self, children):
             return children[0] + children[1]
+        def neg(self, children):
+            return -children[0]
 
         def sub(self, children):
             return children[0] - children[1]
