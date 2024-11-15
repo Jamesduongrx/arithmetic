@@ -168,10 +168,7 @@ class Interpreter(lark.visitors.Interpreter):
     def exp(self, tree):
         x = self.visit(tree.children[0])
         y = self.visit(tree.children[1])
-        if y < 0:
-            return 0
-        return x ** y
-
+        return x ** y if y >= 0 else 0
 
     def paren(self, tree):
         return self.visit(tree.children[0])
@@ -396,12 +393,8 @@ def minify(expr):
     '1+2*3+4*(5+6-7)'
     '''
     tree = parser.parse(expr)
-
-    # Remove redundant parentheses
-    no_parens_tee = RemoveP().transform(tree)
-
-    # Convert the tree to a string representation
-    return ToString().transform(no_parens_tee)
+    no_parens_tree = RemoveP().transform(tree)  
+    return ToString().transform(no_parens_tree) 
 
 
 
