@@ -21,7 +21,6 @@ grammar = r"""
 
 
     ?power: atom "**" power   -> exp
-          | atom
 
     ?atom: NUMBER    -> number
         | "(" sum ")"       -> paren
@@ -169,10 +168,14 @@ class Interpreter(lark.visitors.Interpreter):
     def exp(self, tree):
         x = self.visit(tree.children[0])
         y = self.visit(tree.children[1])
-        return int(x**y)
+        if y < 0:
+            return 0
+        return x ** y
+
 
     def paren(self, tree):
         return self.visit(tree.children[0])
+    
 
 
 
@@ -296,7 +299,9 @@ class Simplifier(lark.Transformer):
             return children[0] % children[1]
 
         def exp(self, children):
-            return int(children[0] ** children[1])
+            x, y = children
+            return x ** y if y >= 0 else 0
+
         
         def paren(self, children):
             return children[0]
@@ -315,11 +320,7 @@ class Simplifier(lark.Transformer):
 class RemoveP(lark.Transformer):
     def paren(self, children):
         return children[0]
-    def start(self, children):
-            return children[0]
         
-
-
 class ToString(lark.Transformer):
     def number(self, children):
         return str(children[0])
@@ -394,10 +395,10 @@ def minify(expr):
     >>> minify("1 + (((2)*(3)) + 4 * ((5 + 6) - 7))")
     '1+2*3+4*(5+6-7)'
     '''
-    parse = parser.parse(expr)
+    tree = parser.parse(expr)
 
     # Remove redundant parentheses
-    no_parens_tee = RemoveP().transform(parse)
+    no_parens_tee = RemoveP().transform(tree)
 
     # Convert the tree to a string representation
     return ToString().transform(no_parens_tee)
@@ -458,7 +459,9 @@ def infix_to_rpn(expr):
     >>> infix_to_rpn('(1*2)+3+4*(5-6)')
     '1 2 * 3 + 4 5 6 - * +'
     '''
-    return parser.parse(expr).transform(ToRPN())
+    tree = parser.parse(expr)
+    return ToRPN().transform(tree)
+
 
     
 
