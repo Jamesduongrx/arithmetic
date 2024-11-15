@@ -23,8 +23,9 @@ grammar = r"""
     ?power: atom "**" power   -> exp
           | atom
 
-    ?atom: NUMBER           -> number
+    ?atom: NUMBER    -> number
         | "(" sum ")"       -> paren
+        | atom "(" sum ")" -> implicit_mul  
 
     NUMBER: /-?[0-9]+/
 
