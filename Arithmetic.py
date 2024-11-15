@@ -318,9 +318,7 @@ class Simplifier(lark.Transformer):
 
 class RemoveP(lark.Transformer):
     def paren(self, children):
-        if len(children) == 1:
-            return children[0]  
-        return f"({children[0]})"  
+        return children[0]
 
 
     def add(self, children):
@@ -342,7 +340,7 @@ class RemoveP(lark.Transformer):
 
         if isinstance(left, str) and "+" in left or "-" in left:
             left = f"({left})"
-            
+
         if isinstance(right, str) and "+" in right or "-" in right:
             right = f"({right})"
         return f"{left}/{right}"
