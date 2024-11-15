@@ -319,13 +319,8 @@ class Simplifier(lark.Transformer):
 class RemoveP(lark.Transformer):
     def paren(self, children):
         child = children[0]
-        # Return child directly if it's a simple value
-        if isinstance(child, str):
-            return child
-        # Use parentheses only for addition or subtraction
-        if str(child).startswith(('add', 'sub')):
-            return f"({child})"
-        return child
+        return f"({child})" if "+" in str(child) or "-" in str(child) else child
+
 
 class ToString(lark.Transformer):
     def start(self, children):
