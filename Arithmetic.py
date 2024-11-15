@@ -328,22 +328,23 @@ class ToString(lark.Transformer):
         return children[0] + "+" + children[1]
 
     def sub(self, children):
-        return children[0] + "-" + children[1]
+        return f"{children[0]}-{children[1]}"
 
     def mul(self, children):
-        return children[0] + "*" + children[1]
+        return f"{children[0]}*{children[1]}"
 
     def div(self, children):
-        return children[0] + "/" + children[1]
+        return f"{children[0]}/{children[1]}"
 
     def mod(self, children):
-        return children[0] + "%" + children[1]
+        return f"{children[0]}%{children[1]}"
 
     def exp(self, children):
-        return children[0] + "**" + children[1]
+        return f"{children[0]}**{children[1]}"
 
     def paren(self, children):
-        return "(" + children[0] + ")"
+        return f"({children[0]})"
+
 
 def minify(expr):
     '''
