@@ -170,7 +170,7 @@ class Interpreter(lark.visitors.Interpreter):
     def exp(self, tree):
         x = self.visit(tree.children[0])
         y = self.visit(tree.children[1])
-        return x ** y if y >= 0 else 0
+        return int(x ** y)
 
     def paren(self, tree):
         return self.visit(tree.children[0])
