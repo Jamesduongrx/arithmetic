@@ -12,10 +12,16 @@ grammar = r"""
     ?sum: product
         | sum "+" product   -> add
         | sum "-" product   -> sub
+        
 
     ?product: atom
         | product "*" atom  -> mul
         | product "/" atom  -> div
+        | product "%" power -> mod
+
+
+    ?power: atom "**" power   -> exp
+          | atom
 
     ?atom: NUMBER           -> number
         | "(" sum ")"       -> paren
@@ -25,6 +31,7 @@ grammar = r"""
     %import common.WS_INLINE
     %ignore WS_INLINE
 """
+
 parser = lark.Lark(grammar)
 
 
@@ -127,6 +134,41 @@ class Interpreter(lark.visitors.Interpreter):
     >>> interpreter.visit(parser.parse("(1+2)(3(4))"))
     36
     '''
+    def start(self, tree):
+        return self.visit(tree.children[0])
+
+    def number(self, tree):
+        return int(tree.children[0])
+
+    def add(self, tree): #adding left + right
+        return self.visit(tree.children[0]) + self.visit(tree.children[1])
+
+    def sub(self, tree):
+        return self.visit(tree.children[0]) - self.visit(tree.children[1])
+
+    def mul(self, tree):
+        x = self.visit(tree.children[0])
+        y = self.visit(tree.children[1])
+        return x * y
+
+    def div(self, tree):
+        x = self.visit(tree.children[0])
+        y = self.visit(tree.children[1])
+        return x // y
+
+    def mod(self, tree):
+        x = self.visit(tree.children[0])
+        y = self.visit(tree.children[1])
+        return x  % y
+
+    def exp(self, tree):
+        x = self.visit(tree.children[0])
+        y = self.visit(tree.children[1])
+        return int(x**y)
+
+    def paren(self, tree):
+        return self.visit(tree.children[0])
+
 
 
 class Simplifier(lark.Transformer):
@@ -226,12 +268,92 @@ class Simplifier(lark.Transformer):
     >>> simplifier.transform(parser.parse("(1+2)(3(4))"))
     36
     '''
+    class Simplifier(lark.Transformer):
+        def start(self, children):
+            return children[0]
+        
+        def number(self, children):
+            return int(children[0])
+
+        def add(self, children):
+            return children[0] + children[1]
+
+        def sub(self, children):
+            return children[0] - children[1]
+
+        def mul(self, children):
+            return children[0] * children[1]
+
+        def div(self, children):
+            return children[0] // children[1]
+
+        def mod(self, children):
+            return children[0] % children[1]
+
+        def exp(self, children):
+            return int(children[0] ** children[1])
+        
+        def paren(self, children):
+            return children[0]
+
 
 
 ########################################
 # other transformations
 ########################################
 
+class RemoveP(lark.Transformer):
+    def paren(self, children):
+        return children[0]
+    def start(self, children):
+            return children[0]
+        
+    def number(self, children):
+            return int(children[0])
+
+    def add(self, children):
+            return children[0] + children[1]
+
+    def sub(self, children):
+            return children[0] - children[1]
+
+    def mul(self, children):
+            return children[0] * children[1]
+
+    def div(self, children):
+            return children[0] // children[1]
+
+    def mod(self, children):
+            return children[0] % children[1]
+
+    def exp(self, children):
+            return int(children[0] ** children[1])
+
+
+class ToString(lark.Transformer):
+    def number(self, children):
+        return str(children[0])
+
+    def add(self, children):
+        return children[0] + "+" + children[1]
+
+    def sub(self, children):
+        return children[0] + "-" + children[1]
+
+    def mul(self, children):
+        return children[0] + "*" + children[1]
+
+    def div(self, children):
+        return children[0] + "/" + children[1]
+
+    def mod(self, children):
+        return children[0] + "%" + children[1]
+
+    def exp(self, children):
+        return children[0] + "**" + children[1]
+
+    def paren(self, children):
+        return "(" + children[0] + ")"
 
 def minify(expr):
     '''
@@ -282,7 +404,42 @@ def minify(expr):
     >>> minify("1 + (((2)*(3)) + 4 * ((5 + 6) - 7))")
     '1+2*3+4*(5+6-7)'
     '''
+    parse = parser.parse(expr)
 
+    # Remove redundant parentheses
+    no_parens_tee = RemoveP().transform(parse)
+
+    # Convert the tree to a string representation
+    return ToString().transform(no_parens_tee)
+
+
+
+
+
+class ToRPN(lark.Transformer):
+    def number(self, children):
+        return str(children[0])
+
+    def add(self, children):
+        return " ".join([children[0], children[1], "+"])
+
+    def sub(self, children):
+        return " ".join([children[0], children[1], "-"])
+
+    def mul(self, children):
+        return " ".join([children[0], children[1], "*"])
+
+    def div(self, children):
+        return " ".join([children[0], children[1], "/"])
+
+    def mod(self, children):
+        return " ".join([children[0], children[1], "%"])
+
+    def exp(self, children):
+        return " ".join([children[0], children[1], "**"])
+
+    def paren(self, children):
+        return children[0]
 
 def infix_to_rpn(expr):
     '''
@@ -311,7 +468,9 @@ def infix_to_rpn(expr):
     >>> infix_to_rpn('(1*2)+3+4*(5-6)')
     '1 2 * 3 + 4 5 6 - * +'
     '''
+    return parser.parse(expr).transform(ToRPN())
 
+    
 
 def eval_rpn(expr):
     '''
@@ -346,6 +505,13 @@ def eval_rpn(expr):
     >>> eval_rpn("1 2 * 3 + 4 5 6 - * +")
     9
     '''
+
+
+
+
+
+
+
     tokens = expr.split()
     stack = []
     operators = {
